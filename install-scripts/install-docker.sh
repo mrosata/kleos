@@ -16,11 +16,10 @@ DOCKER_VERSION="${INSTALL_DOCKER_VERSION:-}"
 ERRNO_BADKEY=${ERRNO_BADKEY:-102}
 BASE_APT_REPO="https://download.docker.com/linux"
 OS_ARCH="$(dpkg --print-architecture)"
+OS_NAME="$(lsb_release -cs)"
 
 #### Add Repos to source lists and install docker-cd
 function install_docker {
-  local OSR_ID=$(. /etc/os-release; echo "$ID")
-  local OS_NAME="$(lsb_release -cs)"
 
   # Uninstall old versions of docker
   sudo apt-get remove \
@@ -44,7 +43,7 @@ function install_docker {
     sudo apt-get install gnupg2 software-properties-common -y
   fi
 
-  curl -fsSL https://download.docker.com/linux/$OSR_ID/gpg | \
+  curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | \
     sudo apt-key add -
   # Note: apt-key isn't supposed to be parsed by scripts
   #       because the output isn't gaurenteed. I'm going to
@@ -59,23 +58,25 @@ function install_docker {
     if [ $ARMHF -eq 1 ];then
       # Installing on a microcontroller
       echo \
-        "deb [arch=armhf] https://download.docker.com/linux/$OSR_ID $OS_NAME stable" | \
+        "deb [arch=armhf] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")
+ $OS_NAME stable" | \
         sudo tee /etc/sources.list.d/docker.list
     
     else
       echo "[+] - Adding Docker apt-repository"
       echo \
-        "deb [arch=$OS_ARCH] $BASE_APT_REPO/$OSR_ID $OS_NAME stable main" 
+        "deb [arch=$OS_ARCH] \
+        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") $OS_NAME stable main" 
       
       sudo add-apt-repository \
-        "deb [arch=$OS_ARCH] $BASE_APT_REPO/$OSR_ID $OS_NAME stable main" 
+        "deb [arch=$OS_ARCH] \
+        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") $OS_NAME stable" 
 
     fi #/end update sources.list
 
     # If using weezy, need to prune one source from source.list
     # because it is non-existant
     if [ "$OS_NAME" == "wheezy" ];then
-      sudo cp /etc/apt/sources.list "/etc/apt/sources.list~bak$(date +%s)"
       sudo cat /etc/apt/sources.list | perl -pe \
         's/^deb-src.+docker\.com\/l.+x/d.+n w.+zy s.+e/#$1/g' \
         > /etc/apt/sources.list.tmp
@@ -85,9 +86,10 @@ function install_docker {
     sudo apt-get update -y -qq >/dev/null
 
     if [ -z "$DOCKER_VERSION" ]; then
-      sudo apt-get install docker-ce -y
+      sudo apt-get install docker-ce -qq -y >/dev/null
     else
-      sudo apt-get install "docker-ce=$DOCKER_VERSION" -y
+      sudo apt-get install \
+        "docker-ce=$DOCKER_VERSION" -qq -y >/dev/null
     fi
 
     if command -v "docker" > /dev/null 2>&1 ; then
