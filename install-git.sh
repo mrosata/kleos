@@ -31,12 +31,12 @@ function install_git {
 
   sudo apt-get update -y
   sudo apt-get install git-core -y
-  git config --global user.name $GIT_USERNAME
-  git config --global user.email $GIT_EMAIL
 }
 
 # Check for git and run install function if not found
-[ x`which git` == x ] && install_git
+[ x`which git` = x ] && install_git
 
-exit 0
+
+git config --global user.name "$GIT_USERNAME"
+git config --global user.email "$GIT_EMAIL"
 
