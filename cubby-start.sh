@@ -40,8 +40,11 @@ if [ ! -f "${HOME}/.vimrc" ];then
     cat "$LOCAL_CUBBY/.vimrc" >> "${HOME}/.vimrc"
 fi
 
-echo "About to install vim plugins"
+echo "[*] - About to install vim plugins"
 vim +PluginInstall +qall
+
+echo "[*] - About to install docker-ce for debian"
+source ./docker-install.sh
 
 
 exit 0
