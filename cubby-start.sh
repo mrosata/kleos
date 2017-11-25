@@ -7,44 +7,43 @@ about to setup this machine for the first time."
 ERRNO_NOSUDO=101
 
 # Variables
-LOCAL_CUBBY="${HOME}/.cubby"
+export LOCAL_CUBBY="$HOME/.cubby"
+export LOCAL_CONF_DIR="$LOCAL_CUBBY/home-configs"
+export CUBBY_CONF_DIR="$PWD/home-configs"
+
 SETUP_GITHUB_CREDS=${SETUP_GITHUB_CREDS:-1}
 
+
 # Configure Git Credentials easily using ./install-git.sh
-[ $SETUP_GITHUB_CREDS -ne 0 ] && source ./install-git.sh
-
-function install_vundle {
-  $(\
-    cd "$HOME" && \
-    git clone https://github.com/VundleVim/Vundle.vim.git \
-      "${HOME}/.vim/bundle/Vundle.vim" \
-  )
-}
-
-function install_vim {
-  sudo apt-get install vim -y
-  [ ! -f "${HOME}/.vimrc" ] && echo "" >> "${HOME}/.vimrc"
-}
-
+if [ $SETUP_GITHUB_CREDS -ne 0 ] && source ./install-git.sh
 
 echo "Creating cubby configs directory"
-[ ! -d "$LOCAL_CUBBY" ] && mkdir "$LOCAL_CUBBY"
-cp ./home-configs/.* "$LOCAL_CUBBY"
+[ ! -d "$LOCAL_CUBBY" ] && mkdir -p "$LOCAL_CUBBY"
+cp "$CUBBY_CONF_DIR/home-configs"/.* "$LOCAL_CONF_DIR"
 
 [ x`which vim` == x ] && install_vim
-[ ! -d "$HOME/.vim/bundle/Vundle.vim" ] && install_vundle
+if [ ! -d "$HOME/.vim/bundle/Vundle.vim" ]; then
+  if ./install_vundle.sh then
+    echo "[*] - Installed Vundle"
+  else
+    echo "[x] - Non-zero exit trying to install Vundle"
+fi
 
 if [ ! -f "${HOME}/.vimrc" ];then
   # TODO: Setup the vimrc download
-  [ -f "$LOCAL_CUBBY/.vimrc" ] && \
-    cat "$LOCAL_CUBBY/.vimrc" >> "${HOME}/.vimrc"
+  [ -f "$HOME/.vimrc" ] && mv "$HOME/.vimrc" "$HOME/.vimrc~bak$(date +s)"
+  [ -f "$LOCAL_CONF_DIR/.vimrc" ] && \
+    cat "$LOCAL_CONF_DIR/.vimrc" > "${HOME}/.vimrc"
 fi
 
-echo "[*] - About to install vim plugins"
-vim +PluginInstall +qall
 
 echo "[*] - About to install docker-ce for debian"
-source ./docker-install.sh
+if ./docker-install.sh
+then
+  echo "Docker Install Script Exited OK"
+else
+  echo "Docker Install Script Exited with non-zero"
+fi
 
 
 exit 0
