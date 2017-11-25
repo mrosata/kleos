@@ -86,3 +86,4 @@ function install_docker {
 
 [ x`which docker` == x ] && install_docker
 
+exit 0

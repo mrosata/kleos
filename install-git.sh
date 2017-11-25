@@ -6,13 +6,13 @@
 ####
 #### If you have your files on the machine hosting cubby already,
 #### or if you just need to install git then use this script.
-#### (If your not me, make sure to change the GIT_USERNAME and 
+#### (If your not me, make sure to change the GIT_NAME and 
 #### GIT_EMAIL variables)
 ####
 
 
 # Github info
-GIT_USERNAME="${GIT_USERNAME:-Michael Rosata}"
+GIT_NAME="${GIT_NAME:-Michael Rosata}"
 GIT_EMAIL="${GIT_EMAIL:-mrosata1984@gmail.com}"
 
 ERRNO_NOSUDO=101
@@ -36,7 +36,12 @@ function install_git {
 # Check for git and run install function if not found
 [ x`which git` = x ] && install_git
 
+CURRENT_GIT_NAME=$(git config --global user.name)
+CURRENT_GIT_EMAIL=$(git config --global user.email)
+[ "$CURRENT_GIT_NAME" != "$GIT_NAME" ] && \
+  git config --global --replace-all user.name "$GIT_NAME"
 
-git config --global user.name "$GIT_USERNAME"
-git config --global user.email "$GIT_EMAIL"
+[ "$CURRENT_GIT_EMAIL" != "$GIT_EMAIL" ] && \
+  git config --global --replace-all user.email "$GIT_EMAIL"
 
+exit 0
