@@ -9,7 +9,6 @@
 ####     https://docs.docker.com/engine/installation/linux/docker-ce
 ####     
 
-set -e
 sh_c='sh -c'
 
 ARMHF=${ARMHF:-0}
