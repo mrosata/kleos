@@ -14,6 +14,7 @@
 KLEOS_CONF_DIR="${KLEOS_CONF_DIR:-${HOME}/.kleos}"
 VUNDLE_PATH=".vim/bundle/Vundle.vim"
 
+
 #### The SETLVL is either 0,1,2 and dictates where to install
 SETLVL=$[$1]
 if [ $SETLVL -ne 1 ] && \
@@ -23,27 +24,46 @@ if [ $SETLVL -ne 1 ] && \
 fi
 
 
-# Create an array for paths where we'll install vundle
+#### Create an array for paths where we'll install vundle
 declare -a home_paths
 home_paths[0]="$HOME"
 
-# Install_x flags for script readability
+
+#### Install_x flags for script readability
 INSTALL_ROOT=$([ $SETLVL -ge 2 ] && echo 1)
 INSTALL_SKEL=$([ $SETLVL -eq 1 -o $SETLVL -eq 3 ] && echo 1)
-[ 1 -eq $INSTALL_ROOT ] && \
+[ "1" == "$INSTALL_ROOT" ] && \
   home_paths[${#home_paths[@]}]="/root"
 
-[ 1 -eq $INSTALL_SKEL ] && \
+[ "1" == "$INSTALL_SKEL" ] && \
   home_paths[${#home_paths[@]}]="/etc/skel"
 
+#### Check if a directory is the users home directory
+function is_user_home {
+  local test_dir="$1"
+  if [ "$(dirname "$test_dir")" == "$(dirname "$HOME")" ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
 
+
+#### Copy a configuration file from kleos repo to a home dir
 function kleos_config_cp {
   local conf_name="$1"
   local dest_dir="$2"
   conf_path="$KLEOS_CONF_DIR/$conf_name"
   if [ -f "$conf_path" -a -d "$dest_dir" ];then
-    cp "conf_path" "$dest_dir"
+  
+    if [ "$(is_user_home "$dest_dir")" == "1" ]; then
+      cp "$conf_path" "$dest_dir"
+    else
+      sudo cp "$conf_path" "$dest_dir"
+    fi
+  
   else
+
     echo "[x] - Kleos unable to copy config file:"
     echo "  source: $conf_path"
     [ ! -f "$conf_path" ] && "    (source is not a file)"
@@ -52,14 +72,22 @@ function kleos_config_cp {
   fi
 }
 
-# Install Vundle
-# param1 {path} - Root Directory of Vundle Install
+
+#### Install Vundle
+#### param1 {path} - Root Directory of Vundle Install
 function install_vundle {
   local root_dir="$1"
-
-  git clone https://github.com/VundleVim/Vundle.vim.git \
-    "$root_dir/.vim/bundle/Vundle.vim"
-
+  local is_home="$(is_user_home "$1")"
+  
+  # Use sudo to clone the Vundle repo when not in home dir
+  if [ "$is_home" != "1" ]; then
+    sudo git clone https://github.com/VundleVim/Vundle.vim.git \
+      "$root_dir/.vim/bundle/Vundle.vim"
+  else
+    git clone https://github.com/VundleVim/Vundle.vim.git \
+      "$root_dir/.vim/bundle/Vundle.vim"
+  fi
+  
   # Copy vimrc with Vundle config to home (root) folder
   if [ ! -f "$root_dir/.vimrc" ];then
     kleos_config_cp ".vimrc" "$root_dir"
@@ -67,20 +95,27 @@ function install_vundle {
 
   # Install the plugins listed in .vimrc
   echo "[*] - About to install vim plugins"
-  vim +PluginInstall +qall
+  sleep 0.25 && echo "[*] - Finished.."
   unset root_dir
 }
 
+
+#### Install VIM
 function install_vim {
   declare -n root_dir=$1
   sudo apt-get install vim -y
   unset root_dir
 }
 
-# 1. If vim isn't installed, do so now.
+
+######################################################################
+#### Install Vundle and VIM (if needed)
+#### 
+#### 1. If vim isn't installed, do so now.
+#### 2. For each install directory, check for then setup Vundle
+
 [ x`which vim` == x ] && install_vim
 
-# 2. For each desired install, check and then setup Vundle
 for home_path in "${home_paths[@]}"; do
   if [ ! -d "$home_path/$VUNDLE_PATH" ]; then
     echo "[ ] - About to install Vundle in $home_path"
@@ -89,6 +124,9 @@ for home_path in "${home_paths[@]}"; do
     echo "[*] - Vundle is already installed in $home_path"
   fi
 done
+
+#### install plugins through vim
+vim +PluginInstall +qall
 
 unset home_paths
 
