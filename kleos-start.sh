@@ -1,39 +1,62 @@
 #!/bin/bash
+######################################################################
+#### @package   Kleos Bootstraping Script
+#### @date      2017-11-26
+#### @license   MIT
+#### @desc
+####   - Kleos sets up your Linux environment (Debian-based), by first
+####     * optionally configuring Git global config user.{name|email}
+####     * installing packages listed in ./apt-packages.list
+####     * update dot files in /home/<user>/.kleos with ./dot-files/*
+####     * copy dot files from /home/<user>/.kleos to /home/<user> 
+####     * installing Vundle (and vim)
+####     * install docker-ce
+####
 
-# Errors
-ERRNO_NOSUDO=101
-
-# Variables
+#### Variables
+KLEOS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCAL_KLEOS="$HOME/.kleos"
-LOCAL_CONF_DIR="$LOCAL_KLEOS/home-configs"
-KLEOS_CONF_DIR="$PWD/home-configs"
+LOCAL_CONF_DIR="$LOCAL_KLEOS/dot-files"
+KLEOS_CONF_DIR="$KLEOS_ROOT/dot-files"
+INSTALL_SCRIPTS="$KLEOS_ROOT/install-scripts"
 
+#### Should script configure github creds
 SETUP_GITHUB_CREDS=${SETUP_GITHUB_CREDS:-1}
+
+#### Error Numbers
+source "$KLEOS_ROOT/errno-vars.conf"
 
 echo "Kleos - your configuration bootstrapper is \
 about to setup this machine for the first time."
 
 
-# Install packages list in apt-packages.list file using apt-get
+#### Install system packages listed in ./apt-packages.list
+####   - if the user has an apt-packages.list file in their home
+####     directory then use that file instead of repo version.
 sudo apt-get update -y && sudo apt-get upgrade -y
-apt_packages_list="$PWD/apt-packages.list"
+if [ -f "$LOCAL_KLEOS/apt-packages.list" ]; then
+  apt_packages_list="$LOCAL_KLEOS/apt-packages.list"
+else
+  apt_packages_list="$KLEOS_ROOT/apt-packages.list"
+fi
+
 [ -f "$apt_packages_list" ] && \
   cat "$apt_packages_list" | xargs sudo apt-get install -y
 
 
-# Configure Git Credentials easily using "$PWD/install-git.sh"
-[ $SETUP_GITHUB_CREDS -ne 0 ] && "$PWD/install-git.sh"
+#### Configure Git Credentials if desired
+[ $SETUP_GITHUB_CREDS -ne 0 ] && "$INSTALL_SCRIPTS/install-git.sh"
 
 
-# Copy all kleos config files 
+#### Copy all kleos config files 
 echo "Creating kleos configs directory"
 mkdir -p "$LOCAL_CONF_DIR"
 cp -r "$KLEOS_CONF_DIR/." "$LOCAL_CONF_DIR"
 
 
-# Setup Vundle and Vim if not already present
+#### Setup Vundle and Vim if not already present
 if [ ! -d "$HOME/.vim/bundle/Vundle.vim" ]; then
-  if "$PWD/install-vundle.sh" ; then
+  if "$INSTALL_SCRIPTS/install-vundle.sh" ; then
     echo "[*] - Installed Vundle"
   else
     echo "[x] - Non-zero exit trying to install Vundle"
@@ -41,7 +64,7 @@ if [ ! -d "$HOME/.vim/bundle/Vundle.vim" ]; then
 fi
 
 
-# Copy .vimrc config from local config folder to home
+#### Copy .vimrc config from local config folder to home
 if [ ! -f "$HOME/.vimrc" ] ; then
   [ -f "$HOME/.vimrc" ] && \
     cp -b "$HOME/.vimrc" "$HOME/"
@@ -51,7 +74,8 @@ fi
 
 
 echo "[*] - About to install docker-ce for debian"
-if "$PWD/install-docker.sh" ; then
+
+if "$INSTALL_SCRIPTS/install-docker.sh" ; then
   echo "Docker Install Script Exited OK"
 else
   echo "Docker Install Script Exited with non-zero"

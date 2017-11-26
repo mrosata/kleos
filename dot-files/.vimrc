@@ -97,11 +97,11 @@ if has('unix') && !has('win32unix')
   Plugin 'Shougo/vimproc.vim'
 endif
 Plugin 'Shougo/neocomplete'
-" Color Scheme: Vim-Hybrid-Material 
-Plugin 'kristijanhusak/vim-hybrid-material'
 " Vim-Airline
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+" Color Scheme: Vim-Hybrid-Material 
+Plugin 'kristijanhusak/vim-hybrid-material'
 " Gutter
 Plugin 'airblade/vim-gitgutter'
 " Vim-JavaScript

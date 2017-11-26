@@ -12,8 +12,8 @@
 sh_c='sh -c'
 
 ARMHF=${ARMHF:-0}
-DOCKER_VERSION="$INSTALL_DOCKER_VERSION"
-ERRNO_BADKEY=102
+DOCKER_VERSION="${INSTALL_DOCKER_VERSION:-}"
+ERRNO_BADKEY=${ERRNO_BADKEY:-102}
 
 function install_docker {
   OSR_ID=$(. /etc/os-release; echo "$ID")
@@ -74,7 +74,7 @@ function install_docker {
     fi #/end wheezy deb-src comment
     
     sudo apt-get update -y
-    if [ "$DOCKER_VERSION" -z ];then
+    if [ -z "$DOCKER_VERSION" ]; then
       sudo apt-get install docker-ce -y
     else
       sudo apt-get install "docker-ce=$DOCKER_VERSION" -y
@@ -82,14 +82,14 @@ function install_docker {
 
     if command -v "docker" > /dev/null 2>&1 ; then
       sudo groupadd docker
-      sudo usermod -aG docker $USER
+      sudo usermod -aG docker "$USER"
     fi
   else
     echo "[x] - Docker key not OK"
     exit $ERRNO_BADKEY
   fi #/end verify key
 
-  if [ x`which docker` != x ];then
+  if [ x`which docker` != x ]; then
     echo "[*] - Docker seems to have installed successfully"
   fi
 }
