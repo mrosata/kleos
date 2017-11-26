@@ -54,14 +54,13 @@ function install_docker {
     echo "[*] - Docker key OK"
     if [ $ARMHF -eq 1 ];then
       # Installing on a microcontroller
-      echo "deb [arch=armhf] https://download.docker.com/linux/$OSR_ID \
-        $OS_NAME stable" | \
+      echo \
+        "deb [arch=armhf] https://download.docker.com/linux/$OSR_ID $OS_NAME stable" | \
         sudo tee /etc/sources.list.d/docker.list
     
     else
       sudo add-apt-repository \
-        "deb [arch=amd64] https://download.docker.com/linux/$OSR_ID \
-        $OS_NAME stable" 
+        "deb [arch=amd64] https://download.docker.com/linux/$OSR_ID $OS_NAME stable" 
 
     fi #/end update sources.list
 
@@ -71,17 +70,21 @@ function install_docker {
       sudo cp /etc/apt/sources.list "/etc/apt/sources.list~bak$(date +%s)"
       sudo cat /etc/apt/sources.list | perl -pe \
         's/^deb-src.+docker\.com\/l.+x/d.+n w.+zy s.+e/#$1/g' \
-        > /etc/apt/sources.list~tmp
-      sudo mv /etc/apt/sources.list~tmp /etc/apt/sources.list
+        > /etc/apt/sources.list.tmp
+      sudo mv /etc/apt/sources.list.tmp /etc/apt/sources.list
     fi #/end wheezy deb-src comment
     
     sudo apt-get update -y
-    if [ x"$DOCKER_VERSION" == x ];then
+    if [ "$DOCKER_VERSION" -z ];then
       sudo apt-get install docker-ce -y
     else
       sudo apt-get install "docker-ce=$DOCKER_VERSION" -y
     fi
 
+    if command -v "docker" > /dev/null 2>&1 ; then
+      sudo groupadd docker
+      sudo usermod -aG docker $USER
+    fi
   else
     echo "[x] - Docker key not OK"
     exit $ERRNO_BADKEY
