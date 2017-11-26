@@ -125,8 +125,12 @@ for home_path in "${home_paths[@]}"; do
   fi
 done
 
-#### install plugins through vim
-vim +PluginInstall +qall
+#### install plugins through vim, as user, then as root if needed
+(vim +PluginInstall +qall)
+if [ $SETLVL -ge 2 ];then
+  (sudo -H vim +PluginInstall +qall)
+fi
+
 
 unset home_paths
 

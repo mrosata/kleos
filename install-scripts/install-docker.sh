@@ -14,22 +14,27 @@ sh_c='sh -c'
 ARMHF=${ARMHF:-0}
 DOCKER_VERSION="${INSTALL_DOCKER_VERSION:-}"
 ERRNO_BADKEY=${ERRNO_BADKEY:-102}
+BASE_APT_REPO="https://download.docker.com/linux"
+OS_ARCH="$(dpkg --print-architecture)"
 
+#### Add Repos to source lists and install docker-cd
 function install_docker {
-  OSR_ID=$(. /etc/os-release; echo "$ID")
-  OS_NAME="$(lsb_release -cs)"
+  local OSR_ID=$(. /etc/os-release; echo "$ID")
+  local OS_NAME="$(lsb_release -cs)"
+
   # Uninstall old versions of docker
-  sudo apt-get remove docker docker-engine docker.io -y
+  sudo apt-get remove \
+    docker docker-engine docker.io -y -qq>/dev/null
 
   # A few requirements we need regardless:
   sudo apt-get install \
     apt-transport-https \
     ca-certificates \
-    curl -y
+    curl -y -qq >/dev/null
   
   # Depending on if using Wheezy, some deps vary:
   if [ $OS_NAME == "wheezy" ];then
-    sudo apt-get install python-software-properties -y
+    sudo apt-get install python-software-properties -y -qq >/dev/null
     backports="deb http://ftp.debian.org/debian wheezy-backports main"
     # Found this trick in get.docker.com script
     if ! grep -Fxq "$backports" /etc/apt/sources.list ; then
@@ -58,8 +63,12 @@ function install_docker {
         sudo tee /etc/sources.list.d/docker.list
     
     else
+      echo "[+] - Adding Docker apt-repository"
+      echo \
+        "deb [arch=$OS_ARCH] $BASE_APT_REPO/$OSR_ID $OS_NAME stable main" 
+      
       sudo add-apt-repository \
-        "deb [arch=amd64] https://download.docker.com/linux/$OSR_ID $OS_NAME stable main" 
+        "deb [arch=$OS_ARCH] $BASE_APT_REPO/$OSR_ID $OS_NAME stable main" 
 
     fi #/end update sources.list
 
@@ -73,7 +82,8 @@ function install_docker {
       sudo mv /etc/apt/sources.list.tmp /etc/apt/sources.list
     fi #/end wheezy deb-src comment
     
-    sudo apt-get update -y
+    sudo apt-get update -y -qq >/dev/null
+
     if [ -z "$DOCKER_VERSION" ]; then
       sudo apt-get install docker-ce -y
     else
