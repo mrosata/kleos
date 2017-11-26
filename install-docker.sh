@@ -9,6 +9,9 @@
 ####     https://docs.docker.com/engine/installation/linux/docker-ce
 ####     
 
+set -e
+sh_c='sh -c'
+
 ARMHF=${ARMHF:-0}
 DOCKER_VERSION="$INSTALL_DOCKER_VERSION"
 ERRNO_BADKEY=102
@@ -26,8 +29,13 @@ function install_docker {
     curl -y
   
   # Depending on if using Wheezy, some deps vary:
-  if [ OS_NAME == "wheezy" ];then
+  if [ $OS_NAME == "wheezy" ];then
     sudo apt-get install python-software-properties -y
+    backports="deb http://ftp.debian.org/debian wheezy-backports main"
+    # Found this trick in get.docker.com script
+    if ! grep -Fxq "$backports" /etc/apt/sources.list ; then
+      (set -x ; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
+    fi
   else
     sudo apt-get install gnupg2 software-properties-common -y
   fi
