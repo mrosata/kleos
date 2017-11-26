@@ -5,4 +5,4 @@ The `apt-packages.list` file should be a list of packages that can be installed 
 
 ##### Changelog
 - __2017-11-24__ - Started Kleos project. Is able to setup Vundle and Docker-CE
-- __2017-11-25__ - Improved the Vundle install script, improved Git global config so it doesn't create multiple global variables. Kleos now installs the list of packages in the `apt-packages.list` file prior to anything else. Install scripts for `vundle` and `docker-ce` no longer are sourced, rather they are ran in a subshell and Kleos Bootstrapper reports their success or failure.
+- __2017-11-25__ - Improved the Vundle install script, improved Git global config so it doesn't create multiple global variables. Kleos now installs the list of packages in the `apt-packages.list` file prior to anything else. Install scripts for `vundle` and `docker-ce` no longer are sourced, rather they are ran in a subshell and Kleos Bootstrapper reports their success or failure. Added `setup-sudo.sh` script for root user to setup sudo and add user into `/etc/sudoers` automagically *(use with care)*

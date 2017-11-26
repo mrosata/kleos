@@ -68,7 +68,7 @@ function install_docker {
     fi #/end wheezy deb-src comment
     
     sudo apt-get update -y
-    if [ $DOCKER_VERSION -z ];then
+    if [ x"$DOCKER_VERSION" == x ];then
       sudo apt-get install docker-ce -y
     else
       sudo apt-get install "docker-ce=$DOCKER_VERSION" -y
@@ -76,7 +76,7 @@ function install_docker {
 
   else
     echo "[x] - Docker key not OK"
-    exit ERRNO_BADKEY
+    exit $ERRNO_BADKEY
   fi #/end verify key
 
   if [ x`which docker` != x ];then
