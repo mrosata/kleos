@@ -11,10 +11,9 @@
 
 
 #### Configuration Variables
-CUBBY_CONF_DIR="${CUBBY_CONF_DIR:-${HOME}/.cubby}"
+KLEOS_CONF_DIR="${KLEOS_CONF_DIR:-${HOME}/.kleos}"
 VUNDLE_PATH=".vim/bundle/Vundle.vim"
-declare -a home_paths
-home_paths[0]="$HOME"
+
 #### The SETLVL is either 0,1,2 and dictates where to install
 SETLVL=$[$1]
 if [ $SETLVL -ne 1 ] && \
@@ -22,6 +21,11 @@ if [ $SETLVL -ne 1 ] && \
    [ $SETLVL -ne 3 ]; then
   SETLVL=0
 fi
+
+
+# Create an array for paths where we'll install vundle
+declare -a home_paths
+home_paths[0]="$HOME"
 
 # Install_x flags for script readability
 INSTALL_ROOT=$([ $SETLVL -ge 2 ] && echo 1)
@@ -33,14 +37,14 @@ INSTALL_SKEL=$([ $SETLVL -eq 1 -o $SETLVL -eq 3 ] && echo 1)
   home_paths[${#home_paths[@]}]="/etc/skel"
 
 
-function cubby_config_cp {
-  declare -n conf_name=$1
-  declare -n dest_dir=$2
-  conf_path="$CUBBY_CONF_DIR/$conf_name"
+function kleos_config_cp {
+  local conf_name="$1"
+  local dest_dir="$2"
+  conf_path="$KLEOS_CONF_DIR/$conf_name"
   if [ -f "$conf_path" -a -d "$dest_dir" ];then
     cp "conf_path" "$dest_dir"
   else
-    echo "[x] - Cubby unable to copy config file:"
+    echo "[x] - Kleos unable to copy config file:"
     echo "  source: $conf_path"
     [ ! -f "$conf_path" ] && "    (source is not a file)"
     echo "  dest: $dest_dir"
@@ -51,24 +55,26 @@ function cubby_config_cp {
 # Install Vundle
 # param1 {path} - Root Directory of Vundle Install
 function install_vundle {
-  declare -n ROOTDIR=$1
+  local root_dir="$1"
 
   git clone https://github.com/VundleVim/Vundle.vim.git \
-    "$ROOTDIR/.vim/bundle/Vundle.vim"
+    "$root_dir/.vim/bundle/Vundle.vim"
 
   # Copy vimrc with Vundle config to home (root) folder
-  if [ ! -f "${ROOTDIR}/.vimrc" ];then
-    cubby_config_cp ".vimrc" "${ROOTDIR}"
+  if [ ! -f "$root_dir/.vimrc" ];then
+    kleos_config_cp ".vimrc" "$root_dir"
   fi
 
   # Install the plugins listed in .vimrc
   echo "[*] - About to install vim plugins"
   vim +PluginInstall +qall
+  unset root_dir
 }
 
 function install_vim {
-  declare -n ROOTDIR=$1
+  declare -n root_dir=$1
   sudo apt-get install vim -y
+  unset root_dir
 }
 
 # 1. If vim isn't installed, do so now.

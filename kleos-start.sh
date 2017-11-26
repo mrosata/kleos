@@ -4,13 +4,13 @@
 ERRNO_NOSUDO=101
 
 # Variables
-LOCAL_CUBBY="$HOME/.cubby"
-LOCAL_CONF_DIR="$LOCAL_CUBBY/home-configs"
-CUBBY_CONF_DIR="$PWD/home-configs"
+LOCAL_KLEOS="$HOME/.kleos"
+LOCAL_CONF_DIR="$LOCAL_KLEOS/home-configs"
+KLEOS_CONF_DIR="$PWD/home-configs"
 
 SETUP_GITHUB_CREDS=${SETUP_GITHUB_CREDS:-1}
 
-echo "Cubby - your configuration bootstrapper is \
+echo "Kleos - your configuration bootstrapper is \
 about to setup this machine for the first time."
 
 
@@ -24,11 +24,10 @@ apt_packages_list="$PWD/apt-packages.list"
 [ $SETUP_GITHUB_CREDS -ne 0 ] && "$PWD/install-git.sh"
 
 
-# Copy all cubby config files 
-echo "Creating cubby configs directory"
-[ ! -d "$LOCAL_CUBBY" -o ! -d "$LOCAL_CONF_DIR" ] && \
-  mkdir -p "$LOCAL_CONF_DIR"
-cp -aui "$CUBBY_CONF_DIR/." "$LOCAL_CONF_DIR/"
+# Copy all kleos config files 
+echo "Creating kleos configs directory"
+mkdir -p "$LOCAL_CONF_DIR"
+cp -r "$KLEOS_CONF_DIR/." "$LOCAL_CONF_DIR"
 
 
 # Setup Vundle and Vim if not already present
@@ -46,7 +45,7 @@ if [ ! -f "$HOME/.vimrc" ] ; then
   [ -f "$HOME/.vimrc" ] && \
     cp -b "$HOME/.vimrc" "$HOME/"
   [ -f "$LOCAL_CONF_DIR/.vimrc" ] && \
-    cp -u "$LOCAL_CONF_DIR/.vimrc" "${HOME}/"
+    cp -u "$LOCAL_CONF_DIR/.vimrc" "$HOME/"
 fi
 
 

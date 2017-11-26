@@ -1,10 +1,10 @@
 #!/bin/bash
 #####################################################################
 #### A bit of a catch-22 here. If the system doesn't have
-#### git installed, then cubby won't be able to do its
+#### git installed, then kleos won't be able to do its
 #### thing (since your files are stored in a git repo).
 ####
-#### If you have your files on the machine hosting cubby already,
+#### If you have your files on the machine hosting kleos already,
 #### or if you just need to install git then use this script.
 #### (If your not me, make sure to change the GIT_NAME and 
 #### GIT_EMAIL variables)
