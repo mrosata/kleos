@@ -59,13 +59,13 @@ function install_docker {
     
     else
       sudo add-apt-repository \
-        "deb [arch=amd64] https://download.docker.com/linux/$OSR_ID $OS_NAME stable" 
+        "deb [arch=amd64] https://download.docker.com/linux/$OSR_ID $OS_NAME stable main" 
 
     fi #/end update sources.list
 
     # If using weezy, need to prune one source from source.list
     # because it is non-existant
-    if [ $OS_NAME == wheezy ];then
+    if [ "$OS_NAME" == "wheezy" ];then
       sudo cp /etc/apt/sources.list "/etc/apt/sources.list~bak$(date +%s)"
       sudo cat /etc/apt/sources.list | perl -pe \
         's/^deb-src.+docker\.com\/l.+x/d.+n w.+zy s.+e/#$1/g' \
