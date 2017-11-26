@@ -107,13 +107,6 @@ Plugin 'airblade/vim-gitgutter'
 " Vim-JavaScript
 Plugin 'pangloss/vim-javascript'
 
-" PLUGINS I WANT BUT HAVEN'T TRIED OUT
-Plugin 'jmcantrell/vim-virtualenv'
-Plugin 'chrisbra/csv.vim'
-Plugin 'majutsushi/tagbar'
-" https://github.com/Shougo/denite.nvim <-- needs Python
-
-
 " ----- END VUNDLE --------------------------------------------------
 call vundle#end()
 

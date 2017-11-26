@@ -11,7 +11,7 @@
 
 
 #### Configuration Variables
-KLEOS_CONF_DIR="${KLEOS_CONF_DIR:-${HOME}/.kleos}"
+KLEOS_CONF_DIR="${KLEOS_CONF_DIR:-$HOME/.kleos}"
 VUNDLE_PATH=".vim/bundle/Vundle.vim"
 
 
@@ -66,9 +66,9 @@ function kleos_config_cp {
 
     echo "[x] - Kleos unable to copy config file:"
     echo "  source: $conf_path"
-    [ ! -f "$conf_path" ] && "    (source is not a file)"
+    [ ! -f "$conf_path" ] && echo "    (source is not a file)"
     echo "  dest: $dest_dir"
-    [ ! -d "$dest_dir" ] && "    (dest is not a directory)"
+    [ ! -d "$dest_dir" ] && echo "    (dest is not a directory)"
   fi
 }
 
@@ -77,13 +77,14 @@ function kleos_config_cp {
 #### param1 {path} - Root Directory of Vundle Install
 function install_vundle {
   local root_dir="$1"
-  local is_home="$(is_user_home "$1")"
+  local is_home=$(is_user_home "$1")
   
   # Use sudo to clone the Vundle repo when not in home dir
   if [ "$is_home" != "1" ]; then
-    sudo git clone https://github.com/VundleVim/Vundle.vim.git \
+    sudo -H mkdir -p "$root_dir/.vim/bundle"
+    sudo -H git clone https://github.com/VundleVim/Vundle.vim.git \
       "$root_dir/.vim/bundle/Vundle.vim"
-  else
+  else # Clone repo without using sudo
     git clone https://github.com/VundleVim/Vundle.vim.git \
       "$root_dir/.vim/bundle/Vundle.vim"
   fi
@@ -103,7 +104,7 @@ function install_vundle {
 #### Install VIM
 function install_vim {
   declare -n root_dir=$1
-  sudo apt-get install vim -y
+  sudo apt-get install vim -y -qq >/dev/null
   unset root_dir
 }
 
@@ -119,18 +120,14 @@ function install_vim {
 for home_path in "${home_paths[@]}"; do
   if [ ! -d "$home_path/$VUNDLE_PATH" ]; then
     echo "[ ] - About to install Vundle in $home_path"
-    install_vundle "$home_path"
+    (install_vundle "$home_path")
   else
     echo "[*] - Vundle is already installed in $home_path"
   fi
 done
 
 #### install plugins through vim, as user, then as root if needed
-(vim +PluginInstall +qall)
-if [ $SETLVL -ge 2 ];then
-  (sudo -H vim +PluginInstall +qall)
-fi
-
+vim +PluginInstall +qall
 
 unset home_paths
 
