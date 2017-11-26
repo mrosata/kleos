@@ -15,6 +15,7 @@ about to setup this machine for the first time."
 
 
 # Install packages list in apt-packages.list file using apt-get
+sudo apt-get update -y && sudo apt-get upgrade -y
 apt_packages_list="$PWD/apt-packages.list"
 [ -f "$apt_packages_list" ] && \
   cat "$apt_packages_list" | xargs sudo apt-get install -y
