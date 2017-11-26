@@ -30,10 +30,9 @@ function install_docker {
     curl -y -qq >/dev/null
   
   OS_ARCH="$(dpkg --print-architecture)"
-  OS_NAME="$(lsb_release -cs)"
   
   # Depending on if using Wheezy, some deps vary:
-  if [ "$OS_NAME" == "wheezy" ];then
+  if [ "$(lsb_release -cs)" == "wheezy" ];then
     sudo apt-get install python-software-properties -y -qq >/dev/null
     backports="deb http://ftp.debian.org/debian wheezy-backports main"
     # Found this trick in get.docker.com script
@@ -59,23 +58,23 @@ function install_docker {
     if [ "$OS_ARCH" == "armhf" ];then
       # Installing on a microcontroller
       echo \
-        "deb [arch=$OS_ARCH] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")
- $OS_NAME stable" | sudo tee /etc/sources.list.d/docker.list
+        "deb [arch=$OS_ARCH] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" | \
+          sudo tee /etc/sources.list.d/docker.list
     
     else
       # Regular computer architecture (amd64 or similar)
       echo "[+] - Adding Docker apt-repository"
       echo "deb [arch=$OS_ARCH] \
-        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") ${OS_NAME} stable"
+        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
         
-      sudo -H add-apt-repository "deb [arch=$OS_ARCH] \
-        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") ${OS_NAME} stable" 
+      sudo add-apt-repository \
+        "deb [arch=${OS_ARCH}] $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable" 
 
     fi #/end update sources.list
 
     # If using weezy, need to prune one source from source.list
     # because it is non-existant
-    if [ "$OS_NAME" == "wheezy" ];then
+    if [ "$(lsb_release -cs)" == "wheezy" ]; then
       sudo cat /etc/apt/sources.list | perl -pe \
         's/^deb-src.+docker\.com\/l.+x/d.+n w.+zy s.+e/#$1/g' \
         > /etc/apt/sources.list.tmp
@@ -87,8 +86,7 @@ function install_docker {
     if [ -z "$DOCKER_VERSION" ]; then
       sudo apt-get install docker-ce -qq -y >/dev/null
     else
-      sudo apt-get install \
-        "docker-ce=$DOCKER_VERSION" -qq -y >/dev/null
+      sudo apt-get install docker-ce="$DOCKER_VERSION" -qq -y >/dev/null
     fi
 
     if command -v "docker" > /dev/null 2>&1 ; then
@@ -105,6 +103,9 @@ function install_docker {
   fi
 }
 
+if ! command -v lsb_release ; then
+  sudo apt-get install lsb_release -y -qq >/dev/null
+fi
 [ x`which docker` == x ] && install_docker
 
 exit 0
