@@ -15,15 +15,13 @@ ARMHF=${ARMHF:-0}
 DOCKER_VERSION="${INSTALL_DOCKER_VERSION:-}"
 ERRNO_BADKEY=${ERRNO_BADKEY:-102}
 BASE_APT_REPO="https://download.docker.com/linux"
-OS_ARCH="$(dpkg --print-architecture)"
-OS_NAME="$(lsb_release -cs)"
 
 #### Add Repos to source lists and install docker-cd
 function install_docker {
 
   # Uninstall old versions of docker
   sudo apt-get remove \
-    docker docker-engine docker.io -y -qq>/dev/null
+    docker docker-engine docker.io -qq>/dev/null
 
   # A few requirements we need regardless:
   sudo apt-get install \
@@ -31,8 +29,11 @@ function install_docker {
     ca-certificates \
     curl -y -qq >/dev/null
   
+  OS_ARCH="$(dpkg --print-architecture)"
+  OS_NAME="$(lsb_release -cs)"
+  
   # Depending on if using Wheezy, some deps vary:
-  if [ $OS_NAME == "wheezy" ];then
+  if [ "$OS_NAME" == "wheezy" ];then
     sudo apt-get install python-software-properties -y -qq >/dev/null
     backports="deb http://ftp.debian.org/debian wheezy-backports main"
     # Found this trick in get.docker.com script
@@ -40,11 +41,11 @@ function install_docker {
       (set -x ; $sh_c "echo \"$backports\" >> /etc/apt/sources.list")
     fi
   else
-    sudo apt-get install gnupg2 software-properties-common -y
+    (sudo apt-get install gnupg2 software-properties-common -y -qq >/dev/null)
   fi
 
-  curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | \
-    sudo apt-key add -
+  (curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | \
+    sudo apt-key add -)
   # Note: apt-key isn't supposed to be parsed by scripts
   #       because the output isn't gaurenteed. I'm going to
   #       say it's fine here since the string we're grepping
@@ -55,22 +56,20 @@ function install_docker {
   
   if [ $VERIFY_KEY -gt 0 ];then
     echo "[*] - Docker key OK"
-    if [ $ARMHF -eq 1 ];then
+    if [ "$OS_ARCH" == "armhf" ];then
       # Installing on a microcontroller
       echo \
-        "deb [arch=armhf] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")
- $OS_NAME stable" | \
-        sudo tee /etc/sources.list.d/docker.list
+        "deb [arch=$OS_ARCH] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")
+ $OS_NAME stable" | sudo tee /etc/sources.list.d/docker.list
     
     else
+      # Regular computer architecture (amd64 or similar)
       echo "[+] - Adding Docker apt-repository"
-      echo \
-        "deb [arch=$OS_ARCH] \
-        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") $OS_NAME stable main" 
-      
-      sudo add-apt-repository \
-        "deb [arch=$OS_ARCH] \
-        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") $OS_NAME stable" 
+      echo "deb [arch=$OS_ARCH] \
+        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") ${OS_NAME} stable"
+        
+      sudo -H add-apt-repository "deb [arch=$OS_ARCH] \
+        $BASE_APT_REPO/$(. /etc/os-release; echo "$ID") ${OS_NAME} stable" 
 
     fi #/end update sources.list
 
