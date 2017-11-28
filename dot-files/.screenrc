@@ -1,0 +1,15 @@
+######################################################################
+#### @application screen
+#### @type config-file
+####
+
+#### Clear/Refresh background color of screen
+####   - The trouble isn't that background doesn't work, but rather 
+####   that when opening a program with screen, the background doesn't
+####   change over whitespace. For instance, as I type this, each 
+####   changed char background color is black background (set by vim),
+####   but unchanged white space is blue (set bg color of shell).
+defbce "on"
+
+#### Set mouse scrolling on by default
+termcapinfo xterm* ti@:te@
