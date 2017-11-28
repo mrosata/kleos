@@ -3,7 +3,6 @@ set nocompatible
 filetype off
 syntax on
 
-
 " Map space to leader instead of "\"
 let mapleader = "\<Space>"
 " In edit mode double space to switch to visual
@@ -45,17 +44,18 @@ Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
 
 " --------------------------------------------------------------------
 " My Plugins
+Plugin 'StanAngeloff/php.vim.git'
+Plugin 'vim-scripts/groovy.vim.git'
+Plugin 'jiangmiao/auto-pairs.git'
 Plugin 'tpope/vim-unimpaired'
 Plugin 'tpope/vim-sensible'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'scrooloose/syntastic'
 let g:syntastic_always_populate_loc_list=1
 map <Leader>s :SyntasticToggleMode<CR>
-
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
-
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 0
 let g:syntastic_check_on_open = 0
@@ -74,7 +74,6 @@ map <Leader>n :NERDTreeToggle<CR>
 let NERDTreeShowHidden = 1
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'godlygeek/tabular'
-
 " press a then = to align on =
 vmap a= :Tabularize /=<CR>
 " press a then ; to align on ::
@@ -107,6 +106,24 @@ Plugin 'airblade/vim-gitgutter'
 " Vim-JavaScript
 Plugin 'pangloss/vim-javascript'
 
+" Uncomment the following lines if using Purescript
+"Plugin 'raichoo/purescript-vim.git'
+"let g:purescript_indent_if = 3
+"let g:purescript_indent_do = 3
+"let g:purescript_indent_case = 5
+"let g:purescript_indent_where = 6
+"let g:purescript_indent_let = 4
+"Plugin 'frigoeu/psc-ide-vim'
+"au FileType purescript nmap <leader>t :PSCIDEtype<CR>
+"au FileType purescript nmap <leader>s :PSCIDEapplySuggestion<CR>
+"au FileType purescript nmap <leader>a :PSCIDEaddTypeAnnotation<CR>
+"au FileType purescript nmap <leader>i :PSCIDEimportIdentifier<CR>
+"au FileType purescript nmap <leader>r :PSCIDEload<CR>
+"au FileType purescript nmap <leader>p :PSCIDEpursuit<CR>
+"au FileType purescript nmap <leader>c :PSCIDEcaseSplit<CR>
+"au FileType purescript nmap <leader>qd :PSCIDEremoveImportQualifications<CR>
+"au FileType purescript nmap <leader>qa :PSCIDEaddImportQualifications<CR>
+
 " ----- END VUNDLE --------------------------------------------------
 call vundle#end()
 
@@ -137,12 +154,10 @@ set cmdheight=1
 "style and colorscheme
 set t_Co=256
 set background=dark
-colorscheme hybrid_material
 set linespace=8
 set guifont=Range\ Mono\ Light:h13
 let g:enable_bold_font = 1
 let g:airline_theme = "hybrid"
-
 let g:airline#extensions#tabline#enabled = 1
 
 
